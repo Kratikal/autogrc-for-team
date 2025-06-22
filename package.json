@@ -1,0 +1,24 @@
+{
+  "name": "grc-platform-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for GRC Platform APIs",
+  "main": "mcp-server.js",
+  "scripts": {
+    "start": "node mcp-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "axios": "^1.10.0"
+  },
+  "bin": {
+    "grc-mcp": "./mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "grc",
+    "compliance",
+    "api"
+  ],
+  "author": "GRC Platform",
+  "license": "MIT"
+}

@@ -83,7 +83,7 @@ def project_creation(tenant, payload, user):
     fw_name = payload.get("framework")
 
     if fw_name == "empty":
-        tenant.create_project(name, user.id, description=description, controls=[])
+        tenant.create_project(name, user.id, None, description=description, controls=[])
         return True
     framework = models.Framework.find_by_name(fw_name, tenant.id)
     if not framework:

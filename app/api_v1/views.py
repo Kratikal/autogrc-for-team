@@ -1361,3 +1361,274 @@ def create_project_control(pid):
     data = request.get_json()
     control = result["extra"]["project"].add_custom_control(data)
     return jsonify(control.as_dict())
+
+
+# SOA (Statement of Applicability) Workflow APIs
+
+@api.route("/projects/<string:pid>/soa/questionnaire", methods=["GET"])
+@login_required
+def get_soa_questionnaire(pid):
+    """Get SOA questionnaire for control applicability assessment"""
+    result = Authorizer(current_user).can_user_access_project(pid)
+    project = result["extra"]["project"]
+    
+    # Generate SOA questionnaire based on framework
+    framework = project.framework
+    questionnaire = {
+        "project_id": pid,
+        "framework": framework.name if framework else "custom",
+        "sections": []
+    }
+    
+    # Group controls by category for questionnaire sections
+    control_categories = {}
+    for control in project.controls:
+        category = control.control.category or "General"
+        if category not in control_categories:
+            control_categories[category] = []
+        control_categories[category].append({
+            "control_id": control.id,
+            "ref_code": control.control.ref_code,
+            "name": control.control.name,
+            "description": control.control.description,
+            "current_applicability": control.is_applicable,
+            "justification": control.notes or ""
+        })
+    
+    for category, controls in control_categories.items():
+        questionnaire["sections"].append({
+            "title": f"{category} Controls",
+            "description": f"Assess applicability of {category} controls for your organization",
+            "controls": controls
+        })
+    
+    return jsonify(questionnaire)
+
+
+@api.route("/projects/<string:pid>/soa/bulk-applicability", methods=["PUT"])
+@login_required
+def update_bulk_control_applicability(pid):
+    """Update control applicability in bulk based on SOA questionnaire responses"""
+    result = Authorizer(current_user).can_user_manage_project(pid)
+    data = request.get_json()
+    
+    updated_controls = []
+    for control_data in data.get("controls", []):
+        control_id = control_data.get("control_id")
+        applicable = control_data.get("applicable")
+        justification = control_data.get("justification", "")
+        
+        try:
+            control_result = Authorizer(current_user).can_user_manage_project_control(control_id)
+            control = control_result["extra"]["control"]
+            
+            if applicable:
+                control.set_as_applicable()
+            else:
+                control.set_as_not_applicable()
+            
+            # Update justification in notes
+            control.notes = justification
+            updated_controls.append(control.as_dict())
+            
+        except Exception as e:
+            current_app.logger.error(f"Error updating control {control_id}: {str(e)}")
+            continue
+    
+    db.session.commit()
+    return jsonify({
+        "message": f"Updated {len(updated_controls)} controls",
+        "updated_controls": updated_controls
+    })
+
+
+@api.route("/projects/<string:pid>/soa/summary", methods=["GET"])
+@login_required
+def get_soa_summary(pid):
+    """Get SOA summary with applicability statistics"""
+    result = Authorizer(current_user).can_user_access_project(pid)
+    project = result["extra"]["project"]
+    
+    total_controls = project.controls.count()
+    applicable_controls = project.controls.filter(models.ProjectControl.is_applicable == True).count()
+    not_applicable_controls = project.controls.filter(models.ProjectControl.is_applicable == False).count()
+    pending_controls = total_controls - applicable_controls - not_applicable_controls
+    
+    # Get controls by category
+    categories = {}
+    for control in project.controls:
+        category = control.control.category or "General"
+        if category not in categories:
+            categories[category] = {
+                "total": 0,
+                "applicable": 0,
+                "not_applicable": 0,
+                "pending": 0
+            }
+        
+        categories[category]["total"] += 1
+        if control.is_applicable == True:
+            categories[category]["applicable"] += 1
+        elif control.is_applicable == False:
+            categories[category]["not_applicable"] += 1
+        else:
+            categories[category]["pending"] += 1
+    
+    return jsonify({
+        "project_id": pid,
+        "framework": project.framework.name if project.framework else "custom",
+        "total_controls": total_controls,
+        "applicable_controls": applicable_controls,
+        "not_applicable_controls": not_applicable_controls,
+        "pending_controls": pending_controls,
+        "completion_percentage": round((applicable_controls + not_applicable_controls) / total_controls * 100, 2) if total_controls > 0 else 0,
+        "categories": categories
+    })
+
+
+@api.route("/projects/<string:pid>/gap-assessment", methods=["GET"])
+@login_required
+def generate_gap_assessment(pid):
+    """Generate comprehensive gap assessment for project"""
+    result = Authorizer(current_user).can_user_access_project(pid)
+    project = result["extra"]["project"]
+    
+    assessment = {
+        "project_id": pid,
+        "project_name": project.name,
+        "framework": project.framework.name if project.framework else "custom",
+        "generated_at": arrow.now().isoformat(),
+        "executive_summary": {},
+        "control_analysis": {},
+        "gaps": [],
+        "recommendations": []
+    }
+    
+    # Executive Summary
+    total_controls = project.controls.count()
+    applicable_controls = project.controls.filter(models.ProjectControl.is_applicable == True).count()
+    implemented_controls = project.subcontrols.filter(models.ProjectSubControl.implementation_status == "implemented").count()
+    total_subcontrols = project.subcontrols.filter(models.ProjectSubControl.is_applicable == True).count()
+    
+    assessment["executive_summary"] = {
+        "total_controls": total_controls,
+        "applicable_controls": applicable_controls,
+        "implemented_subcontrols": implemented_controls,
+        "total_applicable_subcontrols": total_subcontrols,
+        "implementation_percentage": round(implemented_controls / total_subcontrols * 100, 2) if total_subcontrols > 0 else 0,
+        "gaps_identified": total_subcontrols - implemented_controls
+    }
+    
+    # Control Analysis by Category
+    categories = {}
+    for control in project.controls.filter(models.ProjectControl.is_applicable == True):
+        category = control.control.category or "General"
+        if category not in categories:
+            categories[category] = {
+                "total_controls": 0,
+                "implemented_subcontrols": 0,
+                "total_subcontrols": 0,
+                "gaps": 0
+            }
+        
+        categories[category]["total_controls"] += 1
+        
+        for subcontrol in control.subcontrols.filter(models.ProjectSubControl.is_applicable == True):
+            categories[category]["total_subcontrols"] += 1
+            if subcontrol.implementation_status == "implemented":
+                categories[category]["implemented_subcontrols"] += 1
+            else:
+                categories[category]["gaps"] += 1
+    
+    assessment["control_analysis"] = categories
+    
+    # Identify Gaps
+    gaps = []
+    for subcontrol in project.subcontrols.filter(
+        models.ProjectSubControl.is_applicable == True,
+        models.ProjectSubControl.implementation_status != "implemented"
+    ):
+        gaps.append({
+            "control_ref": subcontrol.p_control.control.ref_code,
+            "control_name": subcontrol.p_control.control.name,
+            "subcontrol_ref": subcontrol.subcontrol.ref_code,
+            "subcontrol_name": subcontrol.subcontrol.name,
+            "current_status": subcontrol.implementation_status,
+            "risk_level": "high" if subcontrol.p_control.control.system_level == "high" else "medium",
+            "evidence_count": subcontrol.evidence.count()
+        })
+    
+    assessment["gaps"] = gaps[:50]  # Limit for performance
+    
+    # Generate Recommendations
+    recommendations = []
+    if len(gaps) > 0:
+        recommendations.append({
+            "priority": "high",
+            "title": "Implement Missing Controls",
+            "description": f"Implement {len(gaps)} missing subcontrols to achieve full compliance"
+        })
+    
+    if assessment["executive_summary"]["implementation_percentage"] < 50:
+        recommendations.append({
+            "priority": "high",
+            "title": "Accelerate Implementation",
+            "description": "Current implementation rate is below 50%. Consider additional resources."
+        })
+    
+    assessment["recommendations"] = recommendations
+    
+    return jsonify(assessment)
+
+
+@api.route("/projects/<string:pid>/soa/export", methods=["GET"])
+@login_required  
+def export_soa_document(pid):
+    """Export SOA document as structured data for reporting"""
+    result = Authorizer(current_user).can_user_access_project(pid)
+    project = result["extra"]["project"]
+    
+    soa_document = {
+        "title": f"Statement of Applicability - {project.name}",
+        "project_id": pid,
+        "framework": project.framework.name if project.framework else "custom",
+        "organization": project.tenant.name,
+        "generated_date": arrow.now().format("YYYY-MM-DD"),
+        "version": "1.0",
+        "controls": []
+    }
+    
+    # Include all controls with applicability decisions
+    for control in project.controls.order_by(models.ProjectControl.control_id):
+        control_data = {
+            "ref_code": control.control.ref_code,
+            "name": control.control.name,
+            "description": control.control.description,
+            "category": control.control.category,
+            "applicable": control.is_applicable,
+            "justification": control.notes or "",
+            "implementation_status": "pending"
+        }
+        
+        if control.is_applicable:
+            # Check implementation status of subcontrols
+            implemented_count = control.subcontrols.filter(
+                models.ProjectSubControl.implementation_status == "implemented"
+            ).count()
+            total_count = control.subcontrols.filter(
+                models.ProjectSubControl.is_applicable == True
+            ).count()
+            
+            if total_count > 0:
+                if implemented_count == total_count:
+                    control_data["implementation_status"] = "fully_implemented"
+                elif implemented_count > 0:
+                    control_data["implementation_status"] = "partially_implemented"
+                else:
+                    control_data["implementation_status"] = "not_implemented"
+        else:
+            control_data["implementation_status"] = "not_applicable"
+            
+        soa_document["controls"].append(control_data)
+    
+    return jsonify(soa_document)

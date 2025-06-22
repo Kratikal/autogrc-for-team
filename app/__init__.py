@@ -160,7 +160,7 @@ def configure_errors(app):
 
     @app.errorhandler(exc.SQLAlchemyError)
     def handle_db_exceptions(e):
-        app.logger.warning(f"Rolling back database session in app. Error: {e}")
+        app.logger.warning("Rolling back database session in app. Error: %s", e)
         db.session.rollback()
 
         try:
@@ -177,7 +177,26 @@ def configure_errors(app):
 
 
 def configure_logging(app):
-    """Configures logging for Flask with fallback to standard logging if GCP logging fails."""
+    """Configures comprehensive logging for Flask application."""
+    
+    # Import our comprehensive logging setup
+    try:
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from setup_logging import setup_comprehensive_logging
+        
+        # Set up comprehensive logging
+        loggers = setup_comprehensive_logging(app)
+        app.loggers = loggers
+        
+        # Set Flask app logger level
+        app.logger.setLevel(app.config.get("LOG_LEVEL", "INFO"))
+        
+        app.logger.info("Enabled comprehensive logging system")
+        return
+    except Exception as e:
+        print("Failed to setup comprehensive logging, falling back: %s" % e)
 
     # Clear existing handlers to avoid duplicate logs
     app.logger.handlers.clear()
@@ -201,7 +220,7 @@ def configure_logging(app):
             app.logger.info("Enabled GCP logging")
             return
         except Exception as e:
-            app.logger.error(f"Failed to configure GCP Logging, falling back: {e}")
+            app.logger.error("Failed to configure GCP Logging, falling back: %s", e)
 
     # Fallback to Standard Logging
     formatter = logging.Formatter(

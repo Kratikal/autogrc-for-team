@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "grc-platform": {
+      "command": "node",
+      "args": ["/Users/kratikal/autogrc.ai/tools/gapps-js/gapps/mcp-server.js"],
+      "env": {
+        "GRC_API_BASE_URL": "http://localhost:3000/api/v1",
+        "GRC_AUTH_TOKEN": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc1MDU2MjM5OCwiZXhwIjoxNzUwNjQ4Nzk4fQ.eyJpZCI6Imcyd3ZtcWFrIn0.JiBJ5NEXbaEXLglFODN2gcS2pFYWGnB3zF7kn4vjzHNFeIVWYlZtVC_mYpdjCao7nxo5L52SzAUZN1CIDm_ZSw"
+      }
+    }
+  }
+}

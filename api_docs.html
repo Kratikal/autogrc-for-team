@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRC Platform API Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+        }
+        .endpoint {
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.375rem;
+        }
+        .method-get { border-left-color: #059669; background: #ecfdf5; }
+        .method-post { border-left-color: #2563eb; background: #eff6ff; }
+        .method-put { border-left-color: #d97706; background: #fffbeb; }
+        .method-delete { border-left-color: #dc2626; background: #fef2f2; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto py-8 px-4">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">GRC Platform API Documentation</h1>
+                <p class="text-lg text-gray-600">Comprehensive API for Governance, Risk, and Compliance Management</p>
+                
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-2">Quick Start</h3>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Base URL:</strong> <code class="bg-blue-100 px-2 py-1 rounded">http://localhost:3000/api/v1</code></p>
+                        <p><strong>Authentication:</strong> Bearer Token in header <code class="bg-blue-100 px-2 py-1 rounded">token: your_jwt_token</code></p>
+                        <p><strong>Interactive Docs:</strong> <a href="http://localhost:8002/docs" target="_blank" class="text-blue-600 hover:underline">http://localhost:8002/docs</a></p>
+                        <p><strong>Admin Login:</strong> admin@example.com / admin1234567</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication Section -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🔐 Authentication</h2>
+                
+                <div class="endpoint method-get">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                        <code class="ml-3 text-lg">/api/v1/token</code>
+                    </div>
+                    <p class="text-gray-700 mb-3">Generate JWT authentication token</p>
+                    <div class="code-block">
+curl -X GET "http://localhost:3000/api/v1/token?expiration=3600" \
+  -H "Cookie: session=your_session_cookie"
+
+# Response:
+{
+  "token": "eyJhbGciOiJIUzUxMi...",
+  "expires_in": 3600
+}</div>
+                </div>
+
+                <div class="endpoint method-get">
+                    <div class="flex items-center mb-2">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                        <code class="ml-3 text-lg">/api/v1/health</code>
+                    </div>
+                    <p class="text-gray-700 mb-3">Health check endpoint (no auth required)</p>
+                    <div class="code-block">
+curl http://localhost:3000/api/v1/health
+
+# Response:
+{"message": "ok"}</div>
+                </div>
+            </div>
+
+            <!-- API Categories -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 API Categories</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-green-900">👥 User Management</h3>
+                        <p class="text-sm text-green-700 mt-1">12 endpoints for user operations</p>
+                        <ul class="text-xs text-green-600 mt-2 space-y-1">
+                            <li>• User CRUD operations</li>
+                            <li>• Password management</li>
+                            <li>• Email verification</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900">🏢 Tenant Management</h3>
+                        <p class="text-sm text-blue-700 mt-1">15 endpoints for multi-tenancy</p>
+                        <ul class="text-xs text-blue-600 mt-2 space-y-1">
+                            <li>• Tenant CRUD operations</li>
+                            <li>• User roles & permissions</li>
+                            <li>• Settings management</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-purple-900">📋 Project Management</h3>
+                        <p class="text-sm text-purple-700 mt-1">25+ endpoints for compliance projects</p>
+                        <ul class="text-xs text-purple-600 mt-2 space-y-1">
+                            <li>• SOC2, ISO27001, CMMC projects</li>
+                            <li>• Project lifecycle management</li>
+                            <li>• Reporting & analytics</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-yellow-900">✅ Controls & Compliance</h3>
+                        <p class="text-sm text-yellow-700 mt-1">30+ endpoints for control management</p>
+                        <ul class="text-xs text-yellow-600 mt-2 space-y-1">
+                            <li>• Framework controls</li>
+                            <li>• Control status tracking</li>
+                            <li>• Subcontrol management</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-red-900">📎 Evidence Management</h3>
+                        <p class="text-sm text-red-700 mt-1">20+ endpoints for evidence handling</p>
+                        <ul class="text-xs text-red-600 mt-2 space-y-1">
+                            <li>• Evidence upload & storage</li>
+                            <li>• Control associations</li>
+                            <li>• File management</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-900">🏭 Vendor & Risk</h3>
+                        <p class="text-sm text-indigo-700 mt-1">25+ endpoints for vendor/risk management</p>
+                        <ul class="text-xs text-indigo-600 mt-2 space-y-1">
+                            <li>• Vendor assessments</li>
+                            <li>• Risk registers</li>
+                            <li>• Third-party management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Common Examples -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🚀 Common API Examples</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">1. Create a Compliance Project</h3>
+                        <div class="code-block">
+# First, get your tenants
+curl -H "token: your_jwt_token" http://localhost:3000/api/v1/tenants
+
+# Create SOC2 project
+curl -X POST "http://localhost:3000/api/v1/tenants/{tenant_id}/projects" \
+  -H "token: your_jwt_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "SOC2 Audit 2024",
+    "description": "Annual SOC2 compliance audit",
+    "framework": "soc2"
+  }'</div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">2. Upload Evidence</h3>
+                        <div class="code-block">
+# Create evidence for a project
+curl -X POST "http://localhost:3000/api/v1/projects/{project_id}/evidence" \
+  -H "token: your_jwt_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Security Policy Document",
+    "description": "Company information security policy",
+    "file_name": "security_policy_v2.pdf"
+  }'</div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">3. Update Control Status</h3>
+                        <div class="code-block">
+# Update a control's status to completed
+curl -X PUT "http://localhost:3000/api/v1/controls/{control_id}/status" \
+  -H "token: your_jwt_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "completed",
+    "notes": "Control implementation verified and documented"
+  }'</div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">4. Create Vendor Assessment</h3>
+                        <div class="code-block">
+# Add a vendor
+curl -X POST "http://localhost:3000/api/v1/tenants/{tenant_id}/vendors" \
+  -H "token: your_jwt_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "AWS",
+    "contact_email": "security@aws.com",
+    "website": "https://aws.amazon.com"
+  }'</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Handling -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">⚠️ Error Handling</h2>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-red-900 mb-2">Standard Error Response</h3>
+                    <div class="code-block">
+{
+  "ok": false,
+  "message": "Error description",
+  "code": 400
+}
+
+# Common HTTP Status Codes:
+# 200 - Success
+# 400 - Bad Request
+# 401 - Unauthorized (invalid/missing token)
+# 403 - Forbidden (insufficient permissions)
+# 404 - Not Found
+# 422 - Validation Error
+# 500 - Internal Server Error</div>
+                </div>
+            </div>
+
+            <!-- Resource Links -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🔗 Resources</h2>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Documentation</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li>• <a href="http://localhost:8002/docs" target="_blank" class="text-blue-600 hover:underline">Interactive API Docs (Swagger)</a></li>
+                                <li>• <a href="http://localhost:8002/redoc" target="_blank" class="text-blue-600 hover:underline">Alternative API Docs (ReDoc)</a></li>
+                                <li>• <a href="/Users/kratikal/autogrc.ai/tools/gapps-js/gapps/API_SUMMARY.md" class="text-blue-600 hover:underline">API Summary (Markdown)</a></li>
+                                <li>• <a href="/Users/kratikal/autogrc.ai/tools/gapps-js/gapps/mcp_tools_config.json" class="text-blue-600 hover:underline">MCP Tools Configuration</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Application</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li>• <a href="http://localhost:3000" target="_blank" class="text-blue-600 hover:underline">GRC Platform Web Interface</a></li>
+                                <li>• <a href="http://localhost:3000/api/v1/health" target="_blank" class="text-blue-600 hover:underline">API Health Check</a></li>
+                                <li>• <strong>Admin Login:</strong> admin@example.com / admin1234567</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t border-gray-200 pt-6 text-center text-sm text-gray-500">
+                <p>GRC Platform API Documentation • Generated with FastAPI • Last Updated: December 2024</p>
+                <p class="mt-2">For support, contact your GRC platform administrator</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

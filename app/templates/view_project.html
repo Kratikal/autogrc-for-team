@@ -5303,65 +5303,50 @@ function project(){
 		  );
 		},
 		patchControl: function(patchedControl) {
-			// Retrieve cached controls from localStorage
-			let cacheControls = this.keyExistsInLocalStorage(`${this.projectId}_controls`, parse=true);
-
-			if (cacheControls === false) {
-				console.log("Unable to find controls in cache. Try refreshing");
+			// Use current controls data instead of localStorage cache
+			if (!this.controls || this.controls.length === 0) {
+				console.log("No controls data available. Try refreshing");
 				return;
 			}
 
-			// Iterate through cacheControls and update the control with a matching id
-			const patchedControls = cacheControls.map(control =>
+			// Iterate through current controls and update the control with a matching id
+			const patchedControls = this.controls.map(control =>
 				control.id === patchedControl.id ? { ...control, ...patchedControl } : control
 			);
-
-			// Save the updated controls list to localStorage
-			localStorage.setItem(`${this.projectId}_controls`, JSON.stringify(patchedControls));
 
 			// Update the control data in your application state
 			this.setControlData({"controls": patchedControls});
 		},
 		patchSubControl: function(patchedSubcontrol) {
-			// patch the existing controls by passing a subcontrol object
-			let cacheControls = this.keyExistsInLocalStorage(`${this.projectId}_controls`, parse=true);
-			if (cacheControls !== false) {
-				console.log("Updating controls in cache")
-				patchedControls = cacheControls.map(control => {
-				  if (Array.isArray(control.subcontrols)) {
-					// Map through subcontrols and patch the matching subcontrol by id
-					control = {
-					  ...control,
-					  subcontrols: control.subcontrols.map(subcontrol =>
-						subcontrol.id === patchedSubcontrol.id ? { ...subcontrol, ...patchedSubcontrol } : subcontrol
-					  ),
-					};
-				  }
-				  return control;
-				});
-				localStorage.setItem(`${this.projectId}_controls`, JSON.stringify(patchedControls));
-				this.setControlData({"controls": patchedControls})
-				return
+			// Use current controls data instead of localStorage cache
+			if (!this.controls || this.controls.length === 0) {
+				console.log("No controls data available. Try refreshing");
+				return;
 			}
+
+			console.log("Updating subcontrol in current controls data")
+			const patchedControls = this.controls.map(control => {
+			  if (Array.isArray(control.subcontrols)) {
+				// Map through subcontrols and patch the matching subcontrol by id
+				control = {
+				  ...control,
+				  subcontrols: control.subcontrols.map(subcontrol =>
+					subcontrol.id === patchedSubcontrol.id ? { ...subcontrol, ...patchedSubcontrol } : subcontrol
+				  ),
+				};
+			  }
+			  return control;
+			});
+			this.setControlData({"controls": patchedControls})
 		},
 		getControls: function(useCache=false) {
 		  this.loadingControls = true;
-		  console.log("Trying to load controls")
-		  if (useCache) {
-			let cacheValue = this.keyExistsInLocalStorage(`${this.projectId}_controls`, parse=true);
-
-			if (cacheValue !== false) {
-				console.log("Loading controls from cache")
-				this.setControlData({"controls": cacheValue, "readURL":true})
-				this.loadingControls = false;
-				return
-			}
-		  }
-		  console.log("Loading controls from server")
+		  console.log("Loading controls from server (cache disabled due to size limits)")
 		  request("GET",
 			"/api/v1/projects/" + this.projectId + "/controls?stats=yes",
 			data => {
-			  localStorage.setItem(`${this.projectId}_controls`, JSON.stringify(data));
+			  // localStorage.setItem removed to prevent quota exceeded error
+			  // Controls data is ~9.5MB which exceeds browser localStorage limits
 			  this.setControlData({"controls": data, "readURL":true});
 			  this.disableRefreshBtn = false
 			  this.loadingControls = false;

@@ -6,7 +6,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-def parse_url_with_defaults(url, default_scheme="http", default_port=5000):
+def parse_url_with_defaults(url, default_scheme="http", default_port=3000):
     # Ensure the URL has a scheme, add the default if missing
     if "://" not in url:
         url = f"{default_scheme}://{url}"

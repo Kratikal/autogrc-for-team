@@ -1,0 +1,569 @@
+{
+  "mcpconfig": {
+    "mcpServers": {
+      "grc_platform_api": {
+        "command": "python",
+        "args": ["-m", "mcp_server_grc"],
+        "env": {
+          "GRC_API_BASE_URL": "https://your-grc-platform.com/api/v1",
+          "GRC_API_TOKEN": "your_jwt_token_here"
+        }
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "grc_health_check",
+      "description": "Check GRC platform API health status",
+      "method": "GET",
+      "endpoint": "/health",
+      "authentication": "none",
+      "parameters": {},
+      "example_usage": "Check if the GRC platform API is operational"
+    },
+    {
+      "name": "grc_generate_token",
+      "description": "Generate JWT authentication token for API access",
+      "method": "GET", 
+      "endpoint": "/token",
+      "authentication": "session",
+      "parameters": {
+        "expiration": {
+          "type": "integer",
+          "description": "Token expiration in seconds (0 = never expires)",
+          "default": 600
+        }
+      },
+      "example_usage": "Generate API token for programmatic access: grc_generate_token(expiration=3600)"
+    },
+    {
+      "name": "grc_get_users",
+      "description": "Get all users in the system (super admin only)",
+      "method": "GET",
+      "endpoint": "/admin/users", 
+      "authentication": "token",
+      "parameters": {},
+      "example_usage": "List all users in the platform"
+    },
+    {
+      "name": "grc_create_user",
+      "description": "Create new admin user (super admin only)",
+      "method": "POST",
+      "endpoint": "/admin/users",
+      "authentication": "token",
+      "parameters": {
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "required": true
+        }
+      },
+      "example_usage": "Create admin user: grc_create_user(email='admin@company.com')"
+    },
+    {
+      "name": "grc_get_user",
+      "description": "Get details for specific user",
+      "method": "GET",
+      "endpoint": "/users/{user_id}",
+      "authentication": "token",
+      "parameters": {
+        "user_id": {
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get user details: grc_get_user(user_id='user123')"
+    },
+    {
+      "name": "grc_update_user",
+      "description": "Update user information",
+      "method": "PUT",
+      "endpoint": "/users/{user_id}",
+      "authentication": "token",
+      "parameters": {
+        "user_id": {
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        "username": {
+          "type": "string",
+          "description": "Username"
+        },
+        "email": {
+          "type": "string", 
+          "description": "Email address"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name"
+        },
+        "last_name": {
+          "type": "string",
+          "description": "Last name"
+        }
+      },
+      "example_usage": "Update user: grc_update_user(user_id='user123', first_name='John', last_name='Doe')"
+    },
+    {
+      "name": "grc_get_tenants",
+      "description": "Get all tenants accessible to current user",
+      "method": "GET",
+      "endpoint": "/tenants",
+      "authentication": "token",
+      "parameters": {},
+      "example_usage": "List accessible tenants"
+    },
+    {
+      "name": "grc_create_tenant",
+      "description": "Create new tenant",
+      "method": "POST",
+      "endpoint": "/tenants",
+      "authentication": "token",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Tenant name",
+          "required": true
+        },
+        "contact_email": {
+          "type": "string",
+          "description": "Tenant contact email"
+        },
+        "approved_domains": {
+          "type": "string",
+          "description": "Comma-separated approved domains"
+        }
+      },
+      "example_usage": "Create tenant: grc_create_tenant(name='Acme Corp', contact_email='admin@acme.com')"
+    },
+    {
+      "name": "grc_get_tenant",
+      "description": "Get specific tenant details",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get tenant details: grc_get_tenant(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_get_projects",
+      "description": "Get all projects in tenant",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}/projects",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "List projects: grc_get_projects(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_create_project",
+      "description": "Create new compliance project",
+      "method": "POST",
+      "endpoint": "/tenants/{tenant_id}/projects",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description"
+        },
+        "framework": {
+          "type": "string",
+          "description": "Compliance framework (soc2, iso27001, cmmc, etc.)"
+        }
+      },
+      "example_usage": "Create SOC2 project: grc_create_project(tenant_id='tenant123', name='SOC2 Compliance', framework='soc2')"
+    },
+    {
+      "name": "grc_get_project",
+      "description": "Get specific project details",
+      "method": "GET",
+      "endpoint": "/projects/{project_id}",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get project: grc_get_project(project_id='proj123')"
+    },
+    {
+      "name": "grc_get_controls",
+      "description": "Get all controls for project",
+      "method": "GET",
+      "endpoint": "/projects/{project_id}/controls",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get project controls: grc_get_controls(project_id='proj123')"
+    },
+    {
+      "name": "grc_create_control",
+      "description": "Create custom control for project",
+      "method": "POST",
+      "endpoint": "/projects/{project_id}/controls",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "description": "Control title",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Control description"
+        }
+      },
+      "example_usage": "Create control: grc_create_control(project_id='proj123', title='Access Control Review')"
+    },
+    {
+      "name": "grc_update_control_status",
+      "description": "Update control review status",
+      "method": "PUT",
+      "endpoint": "/controls/{control_id}/status",
+      "authentication": "token",
+      "parameters": {
+        "control_id": {
+          "type": "string",
+          "description": "Control ID",
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "description": "Control status",
+          "enum": ["not_started", "in_progress", "completed", "not_applicable"]
+        },
+        "notes": {
+          "type": "string",
+          "description": "Control notes"
+        }
+      },
+      "example_usage": "Update control: grc_update_control_status(control_id='ctrl123', status='completed')"
+    },
+    {
+      "name": "grc_get_evidence",
+      "description": "Get all evidence for project",
+      "method": "GET",
+      "endpoint": "/projects/{project_id}/evidence",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get evidence: grc_get_evidence(project_id='proj123')"
+    },
+    {
+      "name": "grc_create_evidence",
+      "description": "Create evidence for project",
+      "method": "POST",
+      "endpoint": "/projects/{project_id}/evidence",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "description": "Evidence title",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Evidence description"
+        },
+        "file_name": {
+          "type": "string",
+          "description": "Uploaded file name"
+        }
+      },
+      "example_usage": "Create evidence: grc_create_evidence(project_id='proj123', title='Security Policy Document')"
+    },
+    {
+      "name": "grc_get_vendors",
+      "description": "Get all vendors for tenant",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}/vendors",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get vendors: grc_get_vendors(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_create_vendor",
+      "description": "Create new vendor",
+      "method": "POST",
+      "endpoint": "/tenants/{tenant_id}/vendors",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Vendor name",
+          "required": true
+        },
+        "contact_email": {
+          "type": "string",
+          "description": "Vendor contact email"
+        },
+        "website": {
+          "type": "string",
+          "description": "Vendor website"
+        }
+      },
+      "example_usage": "Create vendor: grc_create_vendor(tenant_id='tenant123', name='AWS', website='aws.amazon.com')"
+    },
+    {
+      "name": "grc_get_risks",
+      "description": "Get all risks for tenant",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}/risks",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get risks: grc_get_risks(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_create_risk",
+      "description": "Create new risk",
+      "method": "POST",
+      "endpoint": "/tenants/{tenant_id}/risks",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "description": "Risk title",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Risk description"
+        },
+        "risk_level": {
+          "type": "string",
+          "description": "Risk severity level",
+          "enum": ["low", "medium", "high", "critical"],
+          "required": true
+        },
+        "mitigation": {
+          "type": "string",
+          "description": "Risk mitigation strategy"
+        }
+      },
+      "example_usage": "Create risk: grc_create_risk(tenant_id='tenant123', title='Data Breach', risk_level='high')"
+    },
+    {
+      "name": "grc_get_assessments",
+      "description": "Get all assessments for tenant",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}/assessments",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get assessments: grc_get_assessments(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_get_policies",
+      "description": "Get all policies for tenant",
+      "method": "GET",
+      "endpoint": "/tenants/{tenant_id}/policies",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get policies: grc_get_policies(tenant_id='tenant123')"
+    },
+    {
+      "name": "grc_create_policy",
+      "description": "Create new policy",
+      "method": "POST",
+      "endpoint": "/tenants/{tenant_id}/policies",
+      "authentication": "token",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant ID",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "description": "Policy title",
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "description": "Policy content",
+          "required": true
+        }
+      },
+      "example_usage": "Create policy: grc_create_policy(tenant_id='tenant123', title='Security Policy', content='...')"
+    },
+    {
+      "name": "grc_add_comment",
+      "description": "Add comment to project",
+      "method": "POST",
+      "endpoint": "/projects/{project_id}/comments",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "description": "Comment content",
+          "required": true
+        }
+      },
+      "example_usage": "Add comment: grc_add_comment(project_id='proj123', content='Status update on controls')"
+    },
+    {
+      "name": "grc_get_project_history",
+      "description": "Get project completion history for last 30 days",
+      "method": "GET",
+      "endpoint": "/projects/{project_id}/history",
+      "authentication": "token",
+      "parameters": {
+        "project_id": {
+          "type": "string",
+          "description": "Project ID",
+          "required": true
+        }
+      },
+      "example_usage": "Get history: grc_get_project_history(project_id='proj123')"
+    },
+    {
+      "name": "grc_get_logs",
+      "description": "Get system audit logs (super admin only)",
+      "method": "GET",
+      "endpoint": "/logs",
+      "authentication": "token",
+      "parameters": {},
+      "example_usage": "Get system logs for compliance audit"
+    }
+  ],
+  "authentication": {
+    "type": "bearer_token",
+    "header": "token",
+    "description": "Use JWT token generated from /api/v1/token endpoint",
+    "setup_instructions": [
+      "1. First login to the GRC platform web interface",
+      "2. Navigate to /api/v1/token endpoint to generate JWT token", 
+      "3. Set GRC_API_TOKEN environment variable with the token",
+      "4. Token can be configured with custom expiration (default 600 seconds)"
+    ]
+  },
+  "examples": {
+    "complete_compliance_workflow": [
+      "# 1. Check system health",
+      "grc_health_check()",
+      "",
+      "# 2. Create new tenant",
+      "tenant = grc_create_tenant(name='Acme Corp', contact_email='admin@acme.com')",
+      "",
+      "# 3. Create SOC2 compliance project", 
+      "project = grc_create_project(tenant_id=tenant.id, name='SOC2 Audit 2024', framework='soc2')",
+      "",
+      "# 4. Get project controls",
+      "controls = grc_get_controls(project_id=project.id)",
+      "",
+      "# 5. Create evidence for controls",
+      "evidence = grc_create_evidence(project_id=project.id, title='Security Policy', description='Company security policy document')",
+      "",
+      "# 6. Update control status",
+      "grc_update_control_status(control_id=controls[0].id, status='completed', notes='Policy reviewed and approved')",
+      "",
+      "# 7. Add project comment",
+      "grc_add_comment(project_id=project.id, content='Control implementation completed for CC6.1')",
+      "",
+      "# 8. Get project completion history",
+      "history = grc_get_project_history(project_id=project.id)"
+    ],
+    "vendor_risk_assessment": [
+      "# 1. Create vendor",
+      "vendor = grc_create_vendor(tenant_id='tenant123', name='Cloud Provider Inc', contact_email='security@cloudprovider.com')",
+      "",
+      "# 2. Create risk associated with vendor",
+      "risk = grc_create_risk(tenant_id='tenant123', title='Vendor Data Processing Risk', risk_level='medium', mitigation='Implement vendor security controls review')",
+      "",
+      "# 3. Get all vendor assessments",
+      "assessments = grc_get_assessments(tenant_id='tenant123')"
+    ],
+    "policy_management": [
+      "# 1. Create security policy",
+      "policy = grc_create_policy(tenant_id='tenant123', title='Information Security Policy', content='This policy defines...')",
+      "",
+      "# 2. Get all policies",
+      "policies = grc_get_policies(tenant_id='tenant123')"
+    ]
+  },
+  "base_url": "https://your-grc-platform.com/api/v1",
+  "documentation_url": "https://your-grc-platform.com/docs"
+}

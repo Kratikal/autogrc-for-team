@@ -17,7 +17,7 @@ def validate_token_in_header(enc_token):
         return False
     if not user.is_active:
         return False
-    if not user.confirmed:
+    if not user.email_confirmed_at:
         return False
     return user
 
