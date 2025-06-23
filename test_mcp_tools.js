@@ -8,7 +8,7 @@
 const axios = require('axios');
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
-const AUTH_TOKEN = 'eyJhbGciOiJIUzUxMiIsImlhdCI6MTc1MDU2MjM5OCwiZXhwIjoxNzUwNjQ4Nzk4fQ.eyJpZCI6Imcyd3ZtcWFrIn0.JiBJ5NEXbaEXLglFODN2gcS2pFYWGnB3zF7kn4vjzHNFeIVWYlZtVC_mYpdjCao7nxo5L52SzAUZN1CIDm_ZSw';
+const AUTH_TOKEN = 'eyJhbGciOiJIUzUxMiIsImlhdCI6MTc1MDY2NDMyNCwiZXhwIjoxNzUwNjY0OTI0fQ.eyJpZCI6Imcyd3ZtcWFrIn0.abAj7HnDI1fffuELqk_pRsH-fMuTSy3aL0XW01qAnqJ88InZhunTxS6zB7FmQ3a6E8_7meNOZKs95i5-DsRTrQ';
 
 console.log('🚀 Testing GRC Platform MCP Tools');
 console.log('=' * 50);
